@@ -788,9 +788,13 @@ function selection(){
 
 /* ---------- self-hosting (Supabase) ---------- */
 /* To host this page yourself, paste your Supabase Project URL and publishable/anon key here. */
-const SUPABASE_URL="sb_publishable_DCTSLXqPh-dZ4oG6Mr0CUA_UfC8WGbg";
+const SUPABASE_URL="https://dyjqurfvtpotegdhgqzr.supabase.co";
 const SUPABASE_KEY="sb_publishable_DCTSLXqPh-dZ4oG6Mr0CUA_UfC8WGbg";
-const SELF_HOSTED=/^https:\/\/[^"]+\.supabase\.co\/?$/.test(SUPABASE_URL)&&SUPABASE_KEY.length>20&&!/PASTE/.test(SUPABASE_KEY);
+/* forgiving: trims spaces, accepts the two values in either order, ignores extra paths after .supabase.co */
+const SB=(()=>{const vals=[SUPABASE_URL,SUPABASE_KEY].map(v=>String(v||"").trim());
+  const url=vals.find(v=>/^https?:\/\/[a-z0-9-]+\.supabase\.co/i.test(v));const key=vals.find(v=>v!==url&&!/PASTE|^https?:/i.test(v)&&v.length>20);
+  return {url:url?url.replace(/^http:/i,"https:").match(/^https:\/\/[a-z0-9-]+\.supabase\.co/i)[0]:null,key:key||null};})();
+const SELF_HOSTED=!!(SB.url&&SB.key);
 function getPw(){try{return localStorage.getItem("sp-pw")||""}catch(e){return S.pwMem||""}}
 function makeSupaDb(url,key){
   url=url.replace(/\/$/,"");
@@ -816,7 +820,7 @@ function makeSupaDb(url,key){
 /* ---------- capabilities ---------- */
 (async()=>{
   let db=null,user=null;
-  if(SELF_HOSTED){db=makeSupaDb(SUPABASE_URL,SUPABASE_KEY);S.self=true}
+  if(SELF_HOSTED){db=makeSupaDb(SB.url,SB.key);S.self=true}
   else if(window.claude&&window.claude.use)window.claude.use("sample").then(fn=>{S.sample=fn;render()}).catch(()=>{});
   if(!S.self){try{[db,user]=await Promise.all([window.claude?.use?window.claude.use("db"):null,window.claude?.use?window.claude.use("user"):null])}catch(e){}
     if(!window.claude)S.unconfigured=true;}
@@ -853,7 +857,7 @@ function render(){
   setStatus();
   const ex=isExample();
   $("exampleBanner").hidden=!ex||S.view==="files"||S.view==="account"||S.dbState==="loading";
-  $("bannerText").innerHTML=S.unconfigured?"<b>Setup isn't finished.</b> Add your Supabase Project URL and key near the top of the file's script (look for sb_publishable_DCTSLXqPh-dZ4oG6Mr0CUA_UfC8WGbg). Until then you're seeing example posts."
+  $("bannerText").innerHTML=S.unconfigured?"<b>Setup isn't finished.</b> "+(!SB.url&&!SB.key?"The Supabase Project URL and key haven't been added to the file yet.":!SB.url?"The Supabase key is in the file, but the Project URL (it looks like https://abcd1234.supabase.co) is missing.":"The Project URL is in the file, but the Supabase key is missing.")+" Until then you're seeing example posts."
     :S.dbState==="off"
     ?"<b>Can't load the saved numbers here.</b> Open this link while signed in to Claude to see the real dashboard. Until then you're seeing example posts."
     :"<b>You're looking at example posts.</b> The numbers are made up so you can see how it works. Add your exported files to replace them.";
