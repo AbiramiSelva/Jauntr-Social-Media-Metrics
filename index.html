@@ -255,6 +255,15 @@ tr:last-child td{border-bottom:0}
 .guide b{color:var(--ink);display:block;margin-bottom:3px;font-size:15px}
 code{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;font-size:12.5px;background:var(--sunk);border:1px solid var(--line);padding:1px 5px;border-radius:5px}
 
+/* what we can do better */
+.better-list{list-style:none;margin:0;padding:0;display:grid}
+.better-list li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid var(--line)}
+.better-list li:first-child{padding-top:0}
+.better-list li:last-child{border-bottom:0;padding-bottom:0}
+.better-list li.none{display:block;color:var(--muted)}
+.better-list .bn{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-head);font-weight:700;font-size:13.5px;background:var(--gold-soft);color:var(--gold)}
+.better-list b{font-size:15.5px}
+.better-list p{margin:4px 0 0;color:var(--muted);font-size:14px}
 /* this month, goals, folds */
 .week{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
 .week-head{font-family:var(--f-head);font-size:19px;font-weight:600;margin:-6px 0 14px;line-height:1.35}
@@ -430,6 +439,7 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
       <div class="card ins-card working"><div class="ins-head"><span class="ic" aria-hidden="true">✓</span><h2>What's working</h2><span class="cnt" id="wCount"></span></div><ul class="ins" id="workList"></ul></div>
       <div class="card ins-card notworking"><div class="ins-head"><span class="ic" aria-hidden="true">✕</span><h2>What's not working</h2><span class="cnt" id="nwCount"></span></div><ul class="ins" id="notList"></ul></div>
     </div>
+    <div class="card"><div class="card-h"><div class="ttl"><h2>What we can do better</h2><span class="sub">Next steps worked out from these numbers, most important first</span></div></div><ol class="better-list" id="ovBetter"></ol></div>
     <div class="card" id="audCard" hidden>
       <div class="card-h"><div class="ttl"><h2>Where your audience is</h2><span class="sub">Jauntr launches in the US and Sri Lanka first, so reach elsewhere helps less right now</span></div></div>
       <div id="audBody"></div>
@@ -477,6 +487,7 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
       <div class="card ins-card working"><div class="ins-head"><span class="ic" aria-hidden="true">✓</span><h2>What's working in the series</h2><span class="cnt" id="bipWCount"></span></div><ul class="ins" id="bipWork"></ul></div>
       <div class="card ins-card notworking"><div class="ins-head"><span class="ic" aria-hidden="true">✕</span><h2>What's not working</h2><span class="cnt" id="bipNCount"></span></div><ul class="ins" id="bipNot"></ul></div>
     </div>
+    <div class="card"><div class="card-h"><div class="ttl"><h2>What we can do better</h2><span class="sub">For the next episodes, worked out from how the series has done, most important first</span></div></div><ol class="better-list" id="bipBetter"></ol></div>
     <p class="method"><b>How this is worked out.</b> Series posts are compared two ways: against your other posts in the same dates (is the series pulling its weight?), and against the typical series post (which topics, openings, formats and days do best). Each post is measured against the typical (median) post on its own platform, so TikTok's bigger numbers and one-off viral posts don't skew it. Engagements = likes + comments + shares. Patterns need at least 2–3 posts behind them, and anything under 6 series posts is an early signal, not proof.</p>
     <div class="card">
       <div class="card-h"><div class="ttl"><h2>Series posts</h2><span class="sub" id="bipTableSub"></span></div></div>
@@ -507,6 +518,7 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
       <div class="card ins-card working"><div class="ins-head"><span class="ic" aria-hidden="true">✓</span><h2>What's working on Fridays</h2><span class="cnt" id="friWCount"></span></div><ul class="ins" id="friWork"></ul></div>
       <div class="card ins-card notworking"><div class="ins-head"><span class="ic" aria-hidden="true">✕</span><h2>What's not working</h2><span class="cnt" id="friNCount"></span></div><ul class="ins" id="friNot"></ul></div>
     </div>
+    <div class="card"><div class="card-h"><div class="ttl"><h2>What we can do better</h2><span class="sub">For the next Friday posts, worked out from how the series has done, most important first</span></div></div><ol class="better-list" id="friBetter"></ol></div>
     <div class="card">
       <div class="card-h"><div class="ttl"><h2>Best and worst Friday posts</h2><span class="sub">For the dates and platforms you picked</span></div>
         <div class="right"><label for="friRankSel" class="label">Rank by</label>
@@ -1392,6 +1404,85 @@ function renderWeek(sel,sc,ins,aud,P){
 }
 
 
+/* ---------- what can we do better: concrete next steps worked out from the numbers ---------- */
+function doBetter(c){
+  const {posts,others,kind,r}=c,out=[],rated=posts.filter(p=>p.er!=null);
+  const add=(score,act,why,n,lift)=>out.push({score,act,why,n,lift:lift==null?-0.3:lift,kind:"content"});
+  const pct=x=>Math.round(Math.abs(x)*100)+"%";
+  const word=kind==="bip"?"building-in-public ":kind==="fri"?"Friday ":"";
+  if(rated.length>=4){
+    const N=platNorms(rated),ix=p=>idxOf(p,N).er,all=median(rated.map(ix))||1;
+    const grp=f=>{const a=rated.filter(f);return a.length?{n:a.length,lift:median(a.map(ix))/all-1}:null};
+    // 1. asking for something
+    const withC=grp(p=>ctasOf(p.c).length>0),noC=grp(p=>p.c&&!ctasOf(p.c).length),share=withC?withC.n/rated.length:0;
+    if(withC&&noC&&withC.n>=2&&noC.n>=2&&withC.lift-noC.lift>=0.15&&share<0.7)
+      add(0.9*(withC.lift-noC.lift),"Ask for something in more captions","Only "+pct(share)+" of these "+word+"posts ask people to save, send or comment, and the ones that do get "+pct((1+withC.lift)/(1+noC.lift)-1)+" more engagement.",withC.n,withC.lift-noC.lift);
+    else if(!withC&&rated.length>=5)add(0.4,"Try asking for something","None of these "+word+"posts ask people to save it, send it to someone or comment. Add one clear ask to the next 3 and compare.",null,0.2);
+    // 2. opening line
+    const hooks=new Map();for(const p of rated){const h=hookOf(p.c);if(h){if(!hooks.has(h))hooks.set(h,[]);hooks.get(h).push(p)}}
+    const hk=[...hooks].map(([h,a])=>({h,n:a.length,lift:median(a.map(ix))/all-1})).filter(x=>x.n>=2).sort((a,b)=>b.lift-a.lift)[0];
+    const plain=rated.filter(p=>p.c&&!hookOf(p.c)).length/rated.length;
+    if(hk&&hk.lift>=0.15&&hk.n/rated.length<0.5)add(0.8*hk.lift,"Open more posts the way your best ones open",hk.h.replace(/^Captions /,"Posts ")+" get "+pct(hk.lift)+" more engagement than usual, but only "+hk.n+" of "+rated.length+" posts do it.",hk.n,hk.lift);
+    else if(plain>=0.6&&rated.length>=5)add(0.35,"Start with a hook",(plain>=0.99?"None of the "+word+"captions open":"About "+pct(plain)+" of "+word+"captions don't open")+" with a number, a question or a “POV”. The first line is what stops the scroll.",null,0.2);
+    // 3. video length and watching to the end
+    const vids=rated.filter(p=>p.du>0);
+    if(vids.length>=4){const bands=new Map();for(const p of vids){const b=lenBand(p.du);if(!bands.has(b))bands.set(b,[]);bands.get(b).push(p)}
+      const bs=[...bands].map(([b,a])=>({b,n:a.length,lift:median(a.map(ix))/all-1})).filter(x=>x.n>=2).sort((a,b)=>b.lift-a.lift);
+      if(bs.length>=2&&bs[0].lift-bs[bs.length-1].lift>=0.2){const out2=vids.filter(p=>lenBand(p.du)!==bs[0].b).length;
+        if(out2/vids.length>=0.4)add(0.7*(bs[0].lift-bs[bs.length-1].lift),"Make videos "+bs[0].b.replace(/^Videos (of )?/,"").replace(/^under/,"under"),bs[0].b+" get "+pct(bs[0].lift)+" more engagement than usual, but "+out2+" of "+vids.length+" videos are a different length.",bs[0].n,bs[0].lift)}}
+    const wt=rated.filter(p=>p.wt!=null&&p.du>0);
+    if(wt.length>=3){const sh=median(wt.map(p=>Math.min(1,p.wt/p.du)));if(sh<0.4)add(0.6,"Tighten the first 2 seconds","The typical "+word+"video is watched for "+fmtP(sh)+" of its length. Open on the problem or the payoff, not a title card, and cut pauses.",wt.length,-(1-sh))}
+    const cr=rated.filter(p=>p.cr!=null);
+    if(cr.length>=3){const m=median(cr.map(p=>p.cr));if(m<0.15)add(0.5,"Give people a reason to stay to the end","Only "+fmtP(m)+" of viewers watch the typical "+word+"video to the end. Tease the payoff early (“the last one is the best”) and keep it short.",cr.length,-0.5)}
+    // 4. topics
+    const th=new Map();for(const p of rated){for(const t of themesOf(p.c).concat(placesOf(p.c))){if(!th.has(t))th.set(t,[]);th.get(t).push(p)}}
+    const ts=[...th].map(([t,a])=>({t,n:a.length,lift:median(a.map(ix))/all-1})).filter(x=>x.n>=2&&x.n<=rated.length*0.85).sort((a,b)=>b.lift-a.lift);
+    if(ts.length&&ts[0].lift>=0.2)add(0.75*ts[0].lift*Math.min(1,ts[0].n/4),"Make more posts about "+ts[0].t,"They get "+pct(ts[0].lift)+" more engagement than your usual "+word+"post · "+ts[0].n+" posts so far.",ts[0].n,ts[0].lift);
+    const wk=ts.length?ts[ts.length-1]:null;
+    if(wk&&wk.lift<=-0.2&&wk!==ts[0])add(0.7*-wk.lift*Math.min(1,wk.n/4),"Change the angle on posts about "+wk.t,"They get "+pct(wk.lift)+" less engagement than usual · "+wk.n+" posts. Tell it through the traveller's problem, or try a different format, before dropping the topic.",wk.n,wk.lift);
+    // 5. hashtags
+    const many=grp(p=>p.c&&(p.c.match(/#[\p{L}\p{N}_]+/gu)||[]).length>=5),few=grp(p=>p.c&&(p.c.match(/#[\p{L}\p{N}_]+/gu)||[]).length<5);
+    if(many&&few&&many.n>=2&&few.lift-many.lift>=0.15)add(0.4*(few.lift-many.lift),"Use fewer hashtags","Posts with 5 or more hashtags get "+pct((1+many.lift)/(1+few.lift)-1)+" less engagement than posts with fewer · "+many.n+" posts.",many.n,many.lift-few.lift);
+    // 6. timing
+    const days=new Map();for(const p of rated){const d=DAYS[toDate(p.d).getDay()];if(!days.has(d))days.set(d,[]);days.get(d).push(p)}
+    const ds=[...days].map(([d,a])=>({d,n:a.length,lift:median(a.map(ix))/all-1})).filter(x=>x.n>=3).sort((a,b)=>b.lift-a.lift);
+    if(kind!=="fri"&&ds.length>=2&&ds[0].lift>=0.2)add(0.45*ds[0].lift,"Post more on "+ds[0].d,ds[0].d+" get "+pct(ds[0].lift)+" more engagement than usual"+(ds[ds.length-1].lift<=-0.15?", "+ds[ds.length-1].d+" "+pct(ds[ds.length-1].lift)+" less":"")+".",ds[0].n,ds[0].lift);
+  }
+  // 7. what each series is for
+  const per=(a,f,only)=>{const b=only?a.filter(only):a,v=sum(b,p=>p.v);return b.length>=2&&v?sum(b,f)/v*1000:null};
+  if(kind==="bip"&&others&&posts.length>=2){
+    const f1=per(posts,p=>p.f||0,p=>p.f!=null),f2=per(others,p=>p.f||0,p=>p.f!=null);
+    if(f1!=null&&f2&&f1<f2*0.9)add(0.8,"End every episode with a reason to follow","The series wins "+f1.toFixed(1)+" followers per 1,000 views vs "+f2.toFixed(1)+" for your other posts. Close with what's coming next week and “follow to see if it works”.",posts.length,f1/f2-1);
+    const c1=per(posts,p=>p.cm||0),c2=per(others,p=>p.cm||0);
+    if(c1!=null&&c2&&c1<c2*0.9)add(0.6,"Ask one easy question","The series gets "+c1.toFixed(1)+" comments per 1,000 views vs "+c2.toFixed(1)+" for other posts. End with a question people can answer in one word.",posts.length,c1/c2-1);
+  }
+  if(kind==="fri"&&others&&posts.length>=2){
+    const s1=per(posts,p=>p.sv||0,hasSaves),s2=per(others,p=>p.sv||0,hasSaves);
+    if(s1!=null&&s2&&s1<s2*0.9)add(0.8,"Give people a reason to save","Friday posts get "+s1.toFixed(1)+" saves per 1,000 views vs "+s2.toFixed(1)+" for your other posts. Put the full plan on screen and say “save this for your trip”.",posts.length,s1/s2-1);
+    const h1=per(posts,p=>p.s||0),h2=per(others,p=>p.s||0);
+    if(h1!=null&&h2&&h1<h2*0.9)add(0.6,"Make it easy to send to a friend","Friday posts get "+h1.toFixed(1)+" shares per 1,000 views vs "+h2.toFixed(1)+" for other posts. Name who it's for (“send this to whoever you'd go with”).",posts.length,h1/h2-1);
+  }
+  // 8. keeping the series going
+  if((kind==="bip"||kind==="fri")&&r&&r.len&&r.len>=21){
+    const weeks=Math.floor(r.len/7),seen=new Set(posts.map(p=>Math.floor(daysBetween(r.from,p.d)/7)));let miss=0;for(let i=0;i<weeks;i++)if(!seen.has(i))miss++;
+    if(miss>=2)add(0.7*miss/weeks+0.2,kind==="fri"?"Post a recommendation every Friday":"Post an episode every week",miss+" of the last "+weeks+" weeks had no "+word+"post. A series only builds a habit if people can count on it.",weeks-miss,-miss/weeks);
+  }
+  // 9. overview only: platforms and Pinterest
+  if(kind==="overview"){
+    if(c.sc&&c.sc.N.length){const x=c.sc.N.find(y=>/behind on/.test(y.what));if(x)add(0.55,"Rethink "+PLAT[x.plat].name,x.why.split(" · ")[0]+". Either test a different format there for a month, or reuse your best posts from other platforms instead of making new ones.",x.n,-0.5)}
+    const P=c.P;if(P&&P.has&&S.plats.has("PI")){const t=pinTotals(P);
+      if(t.out!=null&&t.impr&&t.out/t.impr<0.002)add(0.75,"Link every pin to jauntr.ai","Pins got "+fmtN(t.impr)+" impressions but only "+fmtN(t.out)+" clicks to the site. Add the link and a reason to tap (“the full day-by-day plan”).",null,-0.9);
+      if(P.boards.length>=2&&t.impr&&P.boards[0].impr/t.impr>=0.9)add(0.35,"Name boards after what people search","Almost all impressions come from one board. Boards like “Sri Lanka itinerary” or “Japan in spring” help pins get found.",null,-0.5)}
+    const ins=c.ins;const less=ins&&ins.N.find(x=>x.what==="Posting less often");if(less)add(0.5,"Get back to your usual posting rhythm",less.why,null,less.lift);
+  }
+  out.sort((a,b)=>b.score-a.score);
+  const seen=new Set();return out.filter(x=>{const k=x.act.split(" ").slice(0,3).join(" ");if(seen.has(k))return false;seen.add(k);return true}).slice(0,6);
+}
+function fillBetter(id,list,emptyTxt){
+  $(id).innerHTML=list.length?list.map((x,i)=>{const cf=x.n!=null?confOf({n:x.n,lift:x.lift,kind:"content"}):null;
+    return '<li><span class="bn">'+(i+1)+'</span><div><b>'+esc(x.act)+'</b>'+(cf?'<span class="conf '+cf[1]+'">'+cf[0]+'</span>':"")+'<p>'+esc(x.why)+'</p></div></li>'}).join(""):'<li class="none">'+esc(emptyTxt)+'</li>';
+}
+
 function renderOverview(sel){
   const {cur,prev,r}=sel;
   const P=pinterestData(),pinOn=S.plats.has("PI")&&P.has;
@@ -1469,6 +1560,7 @@ function renderOverview(sel){
   // business results, audience, and the summary at the top
   const aud=renderAudience();
   renderWeek(sel,sc,ins,aud,P);
+  fillBetter("ovBetter",doBetter({posts:cur,kind:"overview",r,sc,P,ins}),"Nothing clear to change yet. Try a longer date range, since it needs at least 4 posts with views.");
   // Pinterest in detail
   $("pinSection").hidden=!pinOn;if(pinOn){renderPinSection(P);const pt=pinTotals(P);$("pinFoldSub").textContent="daily chart, best days, boards and top pins"+(pt.impr?" · "+fmtN(pt.impr)+" impressions in the export":"")}
   // how this is worked out + what the files contained
@@ -1697,6 +1789,7 @@ function renderSeries(c){
   $(pre+"Legend").innerHTML=plats.length>1?plats.map(k=>'<span><i class="k sq" style="background:var('+PLAT[k].cv+')"></i>'+PLAT[k].name+'</span>').join(""):"";
   $(pre+"ChartSub").textContent=series.length?"in date order · each bar is one post":"";
   drawBars($(pre+"Chart"),{isRate:mk==="er",items:sorted.map(p=>({value:val(p),color:cssv(PLAT[p.p].cv),post:p})),emptyText:c.emptyText});
+  fillBetter(pre+"Better",doBetter({posts:series,others,kind:pre,r}),"Nothing clear to change yet. Try a longer date range, since it needs at least 4 series posts with views.");
   fillIns(pre,seriesInsights(series,others,prev,r.len,word),{
     few:"Not enough "+word.low+" posts in these dates to spot patterns yet. Try a longer date range.",
     w:"Nothing in the "+word.low+" series stands out above your usual results in these dates.",
