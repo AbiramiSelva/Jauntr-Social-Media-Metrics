@@ -15,7 +15,7 @@
 :root{
   --bg:#F3F4F7; --surface:#FFFFFF; --sunk:#F6F7F9; --ink:#1A1E2B; --muted:#5C6375; --faint:#8C92A3; --line:#E4E6EC; --line-strong:#D3D7E0;
   --nav:#1F2B4D; --on-nav:#FFFFFF; --gold:#B7791F; --gold-soft:#FBF1DD;
-  --ig:#C2255C; --tt:#008C9E; --fb:#3B5BDB; --pi:#D50C22;
+  --ig:#C2255C; --tt:#008C9E; --fb:#3B5BDB; --pi:#D50C22; --li:#C2410C;
   --good:#237A3B; --good-soft:#E8F5EC; --bad:#C0392B; --bad-soft:#FCECEA;
   --shadow:0 1px 2px rgba(26,30,43,.05),0 2px 8px rgba(26,30,43,.04);
   --f-head:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -25,14 +25,14 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0F1218; --surface:#181C26; --sunk:#1E2330; --ink:#ECEEF3; --muted:#A3AABB; --faint:#757D90; --line:#272C3A; --line-strong:#343A4B;
   --nav:#C9D3F5; --on-nav:#111522; --gold:#F0B44C; --gold-soft:#3A2E17;
-  --ig:#E64980; --tt:#1098AD; --fb:#5C7CFA; --pi:#FF5C6C;
+  --ig:#E64980; --tt:#1098AD; --fb:#5C7CFA; --pi:#FF5C6C; --li:#FF8A3D;
   --good:#5BD17A; --good-soft:#16301F; --bad:#FF7A6B; --bad-soft:#3A1D1B;
   --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#0F1218; --surface:#181C26; --sunk:#1E2330; --ink:#ECEEF3; --muted:#A3AABB; --faint:#757D90; --line:#272C3A; --line-strong:#343A4B;
   --nav:#C9D3F5; --on-nav:#111522; --gold:#F0B44C; --gold-soft:#3A2E17;
-  --ig:#E64980; --tt:#1098AD; --fb:#5C7CFA; --pi:#FF5C6C;
+  --ig:#E64980; --tt:#1098AD; --fb:#5C7CFA; --pi:#FF5C6C; --li:#FF8A3D;
   --good:#5BD17A; --good-soft:#16301F; --bad:#FF7A6B; --bad-soft:#3A1D1B;
   --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark;
 }
@@ -386,6 +386,7 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
           <button class="chip" data-p="IG" style="--c:var(--ig)"><span class="sw"></span>Instagram</button>
           <button class="chip" data-p="TT" style="--c:var(--tt)"><span class="sw"></span>TikTok</button>
           <button class="chip" data-p="FB" style="--c:var(--fb)"><span class="sw"></span>Facebook</button>
+          <button class="chip" data-p="LI" style="--c:var(--li)"><span class="sw"></span>LinkedIn</button>
           <button class="chip" data-p="PI" style="--c:var(--pi)"><span class="sw"></span>Pinterest</button>
         </div>
       </div>
@@ -423,6 +424,16 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
       <div class="legend" id="trendLegend"></div>
       <div class="chart" id="trendChart"></div>
       <p class="takeaway" id="trendTake"></p>
+    </div>
+    <div class="card" id="acctCard" hidden>
+      <div class="card-h"><div class="ttl"><h2>Account growth</h2><span class="sub" id="acctSub"></span></div>
+        <div class="right" id="acctMetricWrap"><label for="acctMetricSel" class="label">Chart</label><select class="sel" id="acctMetricSel"></select></div></div>
+      <div class="mgrid" id="acctTiles" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px"></div>
+      <div class="chart" id="acctChart" style="margin-top:16px"></div>
+      <p class="takeaway" id="acctTake" hidden></p>
+      <div id="acctHours"></div>
+      <div id="acctDists"></div>
+      <div id="acctTables"></div>
     </div>
     <div class="card">
       <div class="card-h"><div class="ttl"><h2>Best and worst posts</h2><span class="sub" id="rankSub">Each post compared with the typical post on its own platform</span></div>
@@ -467,6 +478,20 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
         <ol class="pinlist" id="pinPins"></ol>
       </div>
     
+      </div>
+    </details>
+    <details class="fold" id="liSection" hidden>
+      <summary><span class="pill" style="--c:var(--li)"><i></i>LinkedIn</span> in detail <span class="sub" id="liFoldSub"></span></summary>
+      <div class="view" style="margin-top:16px">
+      <div class="card">
+        <div class="card-h"><div class="ttl"><h2>LinkedIn in these dates</h2><span class="sub" id="liTotSub"></span></div></div>
+        <div class="mgrid" id="liTotals" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px"></div>
+        <p class="takeaway" id="liTake" hidden></p>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="ttl"><h2>LinkedIn posts</h2><span class="sub">Most clicks first. Clicks are the closest LinkedIn gets to someone acting on a post</span></div></div>
+        <div class="tbl-wrap"><table id="liTable"></table></div>
+      </div>
       </div>
     </details>
     <div class="method" id="methodNote"></div>
@@ -594,7 +619,9 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
         <div><b>Pinterest</b>Use Analytics → Overview → Export in Pinterest. The export only includes the metric picked in the chart, so export once with Impressions and once with Pin clicks (same dates) to get both. Uploading a newer export updates the overlapping days.</div>
         <div><b>Video numbers</b>If the export has Duration, Average watch time or Watched full video columns, “What's working” also looks at video length and how long people watch.</div>
         <div><b>Audience by country</b>The countries or locations breakdown from TikTok, Instagram or Facebook. It shows how much of each audience is in the US and Sri Lanka.</div>
-        <div><b>Not used</b>Other account reports (followers by day, viewers, active hours) aren't used. PDFs and screenshots can't be read, so export the CSV or Excel instead.</div>
+        <div><b>LinkedIn</b>On the company page go to Analytics → Content → Export. Its posts sheet goes everywhere the other platforms do, and its daily sheet goes to Account growth. The Followers export (Analytics → Followers) adds follower growth and who your followers are.</div>
+        <div><b>Account reports</b>Followers by day, viewers, profile views, active hours, age and gender, or any other table. They show under Account growth on the Overview, and followers by day fills in New followers when the post exports don't have it.</div>
+        <div><b>Can't be read</b>PDFs, screenshots and Word files. Export the CSV or Excel version instead.</div>
       </div>
     </div>
   </section>
@@ -603,10 +630,10 @@ tr.pinrow td{background:color-mix(in srgb,var(--pi) 4%,var(--surface))}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /*PURE*/
-const PLAT={IG:{name:"Instagram",cv:"--ig"},TT:{name:"TikTok",cv:"--tt"},FB:{name:"Facebook",cv:"--fb"},PI:{name:"Pinterest",cv:"--pi"}};
+const PLAT={IG:{name:"Instagram",cv:"--ig"},TT:{name:"TikTok",cv:"--tt"},FB:{name:"Facebook",cv:"--fb"},PI:{name:"Pinterest",cv:"--pi"},LI:{name:"LinkedIn",cv:"--li"}};
 /* PKEYS = platforms with dated, per-post exports. Pinterest has its own tab because its overview export has no dated posts. */
-const PKEYS=["IG","TT","FB"];
-const ALLP=["IG","TT","FB","PI"];
+const PKEYS=["IG","TT","FB","LI"];
+const ALLP=["IG","TT","FB","LI","PI"];
 const DAYS=["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const pad=n=>String(n).padStart(2,"0");
@@ -630,7 +657,7 @@ const BIP_RE=/#build(ing)?inpublic|\bbuild(ing)?\s+(?:[\w’'-]+\s+){0,3}in\s+pu
 
 function normH(h){return String(h==null?"":h).toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 const FIELDS={
-  date:["publish time","publish date","published","post time","posted","date posted","post date","create time","created time","created","date","time","day"],
+  date:["publish time","publish date","published","post time","posted","date posted","post date","create time","created time","created date","created","date","time","day"],
   id:["post id","video id","media id","content id","id"],
   caption:["description","caption","title","video title","post text","message","text","post"],
   url:["permalink","post link","video link","link","url"],
@@ -644,6 +671,7 @@ const FIELDS={
   shares:["shares","total shares","share count","reposts"],
   saves:["saves","saved","add to favorites","favorites","total favorites","bookmarks"],
   follows:["follows","new followers","followers gained","net followers","follows from post"],
+  clicks:["clicks","link clicks","post clicks","total clicks"],
   dur:["duration sec","duration","video duration","video duration sec","length","video length","duration seconds"],
   watch:["average watch time","avg watch time","average time watched","avg time watched","average seconds viewed","average view duration","average watch time sec","avg watch time sec"],
   comp:["watched full video","full video watched","watched full video percent","completion rate","video completion rate","percentage of video watched to completion"]
@@ -656,7 +684,7 @@ function mapHeaders(headers){
   for(const pass of [0,1]){
     for(const f in FIELDS){ if(map[f]!=null) continue;
       for(const pat of FIELDS[f]){
-        const idx=n.findIndex((h,i)=>!used.has(i)&&h&&(pass===0?h===pat:(h.includes(pat)&&(OWN_WORDS[f]||!BAD_PART.test(h))&&!(f==="date"&&/total|duration|watch|average/.test(h)))));
+        const idx=n.findIndex((h,i)=>!used.has(i)&&h&&(pass===0?h===pat:(h.includes(pat)&&(OWN_WORDS[f]||!BAD_PART.test(h))&&!(f==="date"&&/total|duration|watch|average|\bby\b|start|end/.test(h)))));
         if(idx>-1){map[f]=idx;used.add(idx);break;}
       }
     }
@@ -722,8 +750,9 @@ function platFrom(text){const s=String(text||"").toLowerCase();
   if(/tiktok|tik tok|\btt\b/.test(s))return "TT";
   if(/instagram|insta\b|\big\b|instagr\.am/.test(s))return "IG";
   if(/facebook|\bfb\b|fb\.watch|fb\.com/.test(s))return "FB";
+  if(/linkedin|lnkd\.in|\bli\b/.test(s))return "LI";
   return null;}
-function platFromUrl(u){const s=String(u||"").toLowerCase();if(s.includes("tiktok.com"))return "TT";if(s.includes("instagram.com"))return "IG";if(s.includes("facebook.com")||s.includes("fb.watch"))return "FB";return null}
+function platFromUrl(u){const s=String(u||"").toLowerCase();if(s.includes("tiktok.com"))return "TT";if(s.includes("instagram.com"))return "IG";if(s.includes("facebook.com")||s.includes("fb.watch"))return "FB";if(s.includes("linkedin.com")||s.includes("lnkd.in"))return "LI";return null}
 
 /* rows (array of arrays) + filename -> parse result */
 function parseRows(sheets,fileName,todayStr){
@@ -740,7 +769,8 @@ function parseRows(sheets,fileName,todayStr){
   const order=detectOrder(body.map(r=>r[map.date]));
   const fromName=platFrom(fileName);
   const hn=headers.map(normH);
-  const fromHeaders=hn.some(h=>h.includes("add to favorites"))||hn.some(h=>h==="video views"&&hn.includes("total play time"))?"TT":null;
+  const fromHeaders=hn.some(h=>h.includes("add to favorites"))||hn.some(h=>h==="video views"&&hn.includes("total play time"))?"TT":hn.some(h=>h==="posted by"||h==="reposts"||h.startsWith("click through rate"))?"LI":null;
+  if(fromHeaders==="LI"){const ii=hn.indexOf("impressions");if(ii>-1)map.views=ii;const ci=hn.indexOf("content type");if(ci>-1)map.type=ci}
   const out=[];let skipped=0;
   for(const r of body){
     if(!r||!r.length)continue;
@@ -754,7 +784,7 @@ function parseRows(sheets,fileName,todayStr){
       id:String(g("id")||"").trim(),
       ty:String(g("type")||"").trim().slice(0,30),
       v:views0!=null?views0:(reach!=null?reach:0), r:reach,
-      l:num("likes")||0, cm:num("comments")||0, s:num("shares")||0, sv:num("saves")||0, f:num("follows"),
+      l:num("likes")||0, cm:num("comments")||0, s:num("shares")||0, sv:num("saves")||0, f:num("follows"), ck:num("clicks"),
       vs:views0!=null?null:(reach!=null?"r":null), hasSv:map.saves!=null,
       du:parseSecs(g("dur")), wt:parseSecs(g("watch")), cr:parseShare(g("comp")),
       det:platFrom(g("platform"))||platFromUrl(g("url"))||fromName||fromHeaders||null,
@@ -770,7 +800,7 @@ function parseRows(sheets,fileName,todayStr){
   if(map.caption==null)warnings.push("No caption column: posts will show without text.");
   if(skipped)warnings.push(skipped+" row"+(skipped>1?"s":"")+" skipped (no date or no numbers).");
   const dets=new Set(out.map(r=>r.det));
-  return {rows:out,matched,warnings,detected:dets.size===1?[...dets][0]:(dets.has(null)?null:"mixed")};
+  return {rows:out,matched,warnings,sheet:sheets.indexOf(rows),detected:dets.size===1?[...dets][0]:(dets.has(null)?null:"mixed")};
 }
 function finalizeRows(rows,choice){
   const posts=[];
@@ -781,7 +811,7 @@ function finalizeRows(rows,choice){
     else if(r.u)key=p+"_u"+hashStr(r.u.replace(/[?#].*$/,"").replace(/\/$/,""));
     else key=p+"_h"+hashStr(r.d+"|"+r.c.slice(0,60)+"|"+(r.h==null?"":r.h));
     const o={k:key,p,d:r.d,v:r.v,l:r.l,cm:r.cm,s:r.s,sv:r.sv};
-    if(r.h!=null)o.h=r.h; if(r.c)o.c=r.c; if(r.u)o.u=r.u; if(r.ty)o.ty=r.ty; if(r.r!=null)o.r=r.r; if(r.f!=null)o.f=r.f; if(r.b)o.b=true;
+    if(r.h!=null)o.h=r.h; if(r.c)o.c=r.c; if(r.u)o.u=r.u; if(r.ty)o.ty=r.ty; if(r.r!=null)o.r=r.r; if(r.f!=null)o.f=r.f; if(r.ck!=null)o.ck=r.ck; if(r.b)o.b=true;
     if(r.vs)o.vs=r.vs; if(r.hasSv===false)o.nsv=1; if(r.du!=null)o.du=r.du; if(r.wt!=null)o.wt=r.wt; if(r.cr!=null)o.cr=r.cr;
     posts.push(o);
   }
@@ -792,7 +822,7 @@ function mergeDaily(posts){
   const by=new Map();
   for(const p of posts){const q=by.get(p.k);
     if(!q){by.set(p.k,Object.assign({},p));continue}
-    for(const m of ["v","l","cm","s","sv","f","r"])if(p[m]!=null)q[m]=(q[m]||0)+p[m];
+    for(const m of ["v","l","cm","s","sv","f","r","ck"])if(p[m]!=null)q[m]=(q[m]||0)+p[m];
     if(p.d<q.d){q.d=p.d;if(p.h!=null)q.h=p.h}
     if(!q.c&&p.c)q.c=p.c; if(!q.u&&p.u)q.u=p.u; if(!q.ty&&p.ty)q.ty=p.ty; if(p.b)q.b=true;
     for(const m of ["du","wt","cr"])if(q[m]==null&&p[m]!=null)q[m]=p[m];}
@@ -974,7 +1004,8 @@ const filled=r=>Array.isArray(r)&&r.some(c=>String(c==null?"":c).trim()!=="");
 function platFromHeaders(hs){const n=hs.map(normH).join("|");
   if(/active followers|difference in followers from previous day|total viewers|returning viewers|profile views|add to favorites/.test(n))return "TT";
   if(/accounts reached|accounts engaged|instagram/.test(n))return "IG";
-  if(/page likes|page follows|facebook/.test(n))return "FB";return null}
+  if(/page likes|page follows|facebook/.test(n))return "FB";
+  if(/linkedin|reposts|posted by|click through rate|unique impressions|organic followers|auto invited followers/.test(n))return "LI";return null}
 function parseTable(rows,title,todayStr){
   const body0=rows.filter(filled); if(body0.length<2)return null;
   const hi=Math.max(0,rows.findIndex(r=>r.filter(c=>String(c).trim()).length>=2));
@@ -992,7 +1023,10 @@ function parseTable(rows,title,todayStr){
     const out=[];
     for(const r of body){const d=parseDateCell(r[dateCol],order,todayStr);if(!d)continue;const h=hourCol>=0?parseNum(r[hourCol]):null;out.push([d.d,h==null?null:h].concat(numCols.map(c=>parseNum(r[c]))))}
     if(!out.length)return null;
-    return {type:"series",title,metrics:numCols.map(c=>headers[c]),hourly:hourCol>=0,rows:out,pct:numCols.map(pct)};
+    /* Meta exports put the metric name in a line above a "Date, Primary" header, so use that line instead of "Primary" */
+    const above=rows.slice(0,hi).map(r=>(r||[]).filter(c=>String(c==null?"":c).trim())).filter(r=>r.length===1).map(r=>String(r[0]).trim()).filter(t=>!/^sep=/i.test(t)&&t.length<60).pop();
+    const mName=h=>/^(primary|value|values|count|total|amount|number)$/i.test(h)?(above||title):h;
+    return {type:"series",title,metrics:numCols.map(c=>mName(headers[c])),hourly:hourCol>=0,rows:out,pct:numCols.map(pct)};
   }
   if(numCols.length&&!numCols.includes(0)){
     const items=body.map(r=>[String(r[0]).slice(0,60),parseNum(r[numCols[0]])]).filter(x=>x[0]&&x[1]!=null).slice(0,40);
@@ -1008,7 +1042,7 @@ function audienceFrom(tables){
   for(const t of tables){if(t.type!=="dist")continue;
     const hits=t.items.filter(x=>countryOf(x[0]));if(hits.length<Math.max(2,t.items.length*0.6))continue;
     const tot=sum(t.items,x=>x[1]);const scale=t.pct||tot<=1.05?(t.items.some(x=>x[1]>1)?100:1):tot;
-    return {items:t.items.map(x=>[countryOf(x[0])||String(x[0]),x[1]/scale]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,30),counts:!(t.pct||tot<=1.05)};
+    return {src:t.items,items:t.items.map(x=>[countryOf(x[0])||String(x[0]),x[1]/scale]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,30),counts:!(t.pct||tot<=1.05)};
   }
   return null;
 }
@@ -1022,15 +1056,29 @@ function parseAny(sheets,names,fileName,todayStr){
       return {kind:"pinterest",pin,detected:"PI",rows:[],matched:pinterestSummary(pin),warnings:pin.est?["Pinterest marks numbers from "+pin.est+" onwards as estimates. Upload a fresh export later to replace them."]:[]};
   }
   const p=parseRows(sheets,fileName,todayStr);
-  if(!p.error&&p.rows.length)return Object.assign({kind:"posts"},p);
+  /* a "posts" file where no row has a caption, link or ID is really one row per day for the whole account, so read it as an account report */
+  if(!p.error&&p.rows.length&&!isDailyTotals(finalizeRows(p.rows,p.detected&&p.detected!=="mixed"?p.detected:"IG"))){
+    /* other sheets with daily numbers (LinkedIn's "Metrics" sheet, for example) go to Account growth */
+    const stem0=fileName.replace(/\.[^.]+$/,"").replace(/^[0-9a-f]{6,}-/i,"").replace(/[_-]+/g," ").trim();
+    const extra=withData.filter(x=>sheets.indexOf(x.rows)!==p.sheet).map(x=>parseTable(x.rows,stem0+" · "+x.name,todayStr)).filter(t=>t&&t.type==="series");
+    return Object.assign({kind:"posts",extra},p);}
   const stem=fileName.replace(/\.[^.]+$/,"").replace(/^[0-9a-f]{6,}-/i,"").replace(/[_-]+/g," ").replace(/([a-z])([A-Z])/g,"$1 $2").trim();
   const tables=[];
   for(const x of withData){const t=parseTable(x.rows,withData.length>1?stem+" · "+x.name:stem,todayStr);if(t)tables.push(t)}
   if(!tables.length)return {error:p.error||"Couldn't find any data in this file."};
   const aud=audienceFrom(tables);
-  if(aud){const det=platFrom(fileName)||platFromHeaders(withData.flatMap(x=>(x.rows.find(filled)||[])))||null;
-    return {kind:"audience",aud,detected:det,rows:[],matched:["audience by country ("+aud.items.length+" countries)"],warnings:[]};}
-  return {error:"This looks like an account report (followers by day, viewers, active hours). The dashboard uses per-post exports, Pinterest's Analytics overview and audience-by-country reports, so this file isn't needed."};
+  if(aud){const det=platFrom(fileName)||platFromHeaders(withData.flatMap(x=>x.rows.slice(0,6).filter(filled).flat()))||null;
+    const extra=tables.filter(t=>!(t.type==="dist"&&t.items===aud.src));
+    return {kind:"audience",aud,extra,detected:det,rows:[],matched:["audience by country ("+aud.items.length+" countries)"].concat(extra.map(tableSummary)),warnings:[]};}
+  /* anything else (followers by day, viewers, profile views, active hours, age/gender, any other table) is kept as an account report */
+  const det=platFrom(fileName)||platFromHeaders(withData.flatMap(x=>x.rows.slice(0,6).filter(filled).flat()))||null;
+  return {kind:"tables",tables,detected:det,rows:[],matched:tables.map(tableSummary),warnings:[]};
+}
+function tableSummary(t){
+  if(t.type==="series"){const ds=t.rows.map(r=>r[0]).sort(),days=new Set(ds).size;
+    return t.metrics.join(", ")+(t.hourly?" by hour":"")+" · "+days+" day"+(days>1?"s":"")}
+  if(t.type==="dist")return t.metric+" by "+t.label.toLowerCase()+" ("+t.items.length+")";
+  return t.title+" ("+t.rows.length+" rows)";
 }
 /* ---------- Pinterest "Analytics overview" export: a daily block, then Top boards and Top pins tables ---------- */
 function isPinterestExport(sheets,fileName){
@@ -1238,7 +1286,7 @@ function render(){
   const platNames=PKEYS.filter(k=>S.plats.has(k)).map(k=>PLAT[k].name);
   const withPin=S.view==="overview"&&S.plats.has("PI")&&pinterestData().has;
   $("rangeLabel").textContent=S.view==="files"?"Add exports and manage what's on the dashboard":S.view==="ideas"?"What to post next, and why":
-    fmtDate(sel.r.from,sel.r.from.slice(0,4)!==sel.r.to.slice(0,4))+" – "+fmtDate(sel.r.to,true)+" · "+sel.cur.length+" post"+(sel.cur.length===1?"":"s")+(platNames.length?" on "+(platNames.length===3?"Instagram, TikTok and Facebook":platNames.join(" and ")):"")+(withPin?" · plus Pinterest":"");
+    fmtDate(sel.r.from,sel.r.from.slice(0,4)!==sel.r.to.slice(0,4))+" – "+fmtDate(sel.r.to,true)+" · "+sel.cur.length+" post"+(sel.cur.length===1?"":"s")+(platNames.length?" on "+(platNames.length>1?platNames.slice(0,-1).join(", ")+" and "+platNames[platNames.length-1]:platNames[0]):"")+(withPin?" · plus Pinterest":"");
   $("view-overview").hidden=S.view!=="overview";
   $("view-bip").hidden=S.view!=="build-in-public";
   $("view-fri").hidden=S.view!=="friday";
@@ -1324,7 +1372,7 @@ function renderScorecard(cur,prev,P){
       (tot.impr?'<b style="color:var(--ink)">Whole export ('+(P.period?fmtDate(P.period.from)+" – "+fmtDate(P.period.to,true):"")+'):</b> '+fmtN(tot.impr)+' impressions · '+(tot.eng!=null?fmtP(tot.eng/tot.impr)+" engagement · ":"")+(tot.saves!=null?f1(tot.saves/tot.impr*1000)+" saves per 1K · ":"")+(tot.out!=null?fmtN(tot.out)+" clicks to your site":""):"")+'</td></tr>';}
   $("platTable").innerHTML='<thead><tr><th>Platform</th><th class="n">Posts</th><th class="n">Typical views per post</th><th class="n">Typical engagement rate</th><th class="n">Shares per 1K views</th><th class="n">Saves per 1K views</th><th class="n">New followers per 1K views</th><th class="n">Typical views vs before</th></tr></thead><tbody>'+(body||'<tr><td colspan="8" class="empty">No posts in these dates.</td></tr>')+'</tbody>';
   const rb=sc.rows.filter(r=>r.reachBased).map(r=>PLAT[r.k].name);
-  $("scoreNote").innerHTML="<b>Typical</b> = the middle post (the median), so one viral post can't skew it. <b>Engagement rate</b> = (likes + comments + shares) ÷ views. Saves are shown on their own because Facebook doesn't export them. Platforms need 3 or more posts in the dates to be ranked."+(rb.length?' <span style="color:var(--bad)">* '+esc(rb.join(" and "))+"'s file has no Views column, so Reach is used, which makes its engagement rate look higher than the others.</span>":"");
+  $("scoreNote").innerHTML="<b>Typical</b> = the middle post (the median), so one viral post can't skew it. <b>Engagement rate</b> = (likes + comments + shares) ÷ views. Saves are shown on their own because Facebook doesn't export them. Platforms need 3 or more posts in the dates to be ranked."+(sc.rows.some(x=>x.k==="LI")?" LinkedIn's views are its impressions, and reposts count as shares.":"")+(rb.length?' <span style="color:var(--bad)">* '+esc(rb.join(" and "))+"'s file has no Views column, so Reach is used, which makes its engagement rate look higher than the others.</span>":"");
   return sc;
 }
 
@@ -1364,11 +1412,151 @@ function renderAudience(){
   return out;
 }
 
+/* ---------- account reports: followers by day, viewers, profile views, active hours, age/gender, any other table ---------- */
+const LEVEL_RE=/^(total )?(followers?|fans|subscribers|page likes|page followers|follower count|lifetime .*)$/i;
+const GAIN_RE=/difference in followers|new followers|followers gained|net follow|net new|^follows$|page follows|new follows|follower growth|gained/i;
+let acctCache={ver:-1,data:null};
+function accountData(){
+  if(acctCache.ver===ver)return acctCache.data;
+  const series=new Map(),hourly=new Map(),dists=new Map(),tabs=new Map();
+  const fs=[...S.files.entries()].filter(([,f])=>f.kind==="tables").sort((a,b)=>(a[1].uploadedAt||0)-(b[1].uploadedAt||0));
+  for(const [fid,f] of fs){const ch=S.chunks.get(fid+"_0");if(!ch||!Array.isArray(ch.tables))continue;
+    for(const t of ch.tables){const p=t.p||(f.platforms&&f.platforms[0]);if(!p||!PLAT[p])continue;
+      if(t.type==="series"){
+        (t.metrics||[]).forEach((m,mi)=>{
+          if(t.hourly){const k=p+"|"+normH(m),o=hourly.get(k)||{p,name:m,dh:{}};
+            for(const r of t.rows){const h=r[1],v=r[2+mi];if(h==null||v==null)continue;(o.dh[r[0]]=o.dh[r[0]]||{})[h]=v}
+            hourly.set(k,o);return}
+          const k=p+"|"+normH(m),o=series.get(k)||{p,name:m,pct:!!(t.pct&&t.pct[mi]),d:{}};
+          for(const r of t.rows){const v=r[2+mi];if(v!=null)o.d[r[0]]=v}   /* newer uploads replace overlapping days */
+          series.set(k,o)});
+      }else if(t.type==="dist")dists.set(p+"|"+normH(t.title+"|"+t.metric),Object.assign({},t,{p,at:f.uploadedAt}));
+      else if(t.type==="table")tabs.set(p+"|"+normH(t.title),Object.assign({},t,{p,at:f.uploadedAt}));
+    }}
+  /* drop columns that are all zero (e.g. sponsored numbers when nothing was boosted), and "X (organic)" when "X (total)" says the same */
+  let SL=[...series.values()].filter(x=>Object.values(x.d).some(v=>v));
+  SL=SL.filter(x=>!(/\(organic\)\s*$/i.test(x.name)&&SL.some(y=>y.p===x.p&&normH(y.name)===normH(x.name.replace(/\(organic\)\s*$/i,"(total)")))));
+  /* a "Followers" column is a running total only if it looks like one: big numbers that change a little each day.
+     LinkedIn's "Total followers" is new followers per day, so it's added up instead. */
+  for(const x of SL){const ds=Object.keys(x.d).sort(),v=ds.map(d=>x.d[d]),df=v.slice(1).map((a,i)=>Math.abs(a-v[i]));
+    x.level=LEVEL_RE.test(String(x.name).trim())&&!GAIN_RE.test(x.name)&&!x.pct&&(v.length<2||median(v)>=5*Math.max(1,median(df)))}
+  const all=SL.flatMap(s=>Object.keys(s.d)).concat([...hourly.values()].flatMap(h=>Object.keys(h.dh))).sort();
+  const data={series:SL,hourly:[...hourly.values()],dists:[...dists.values()],tabs:[...tabs.values()],first:all[0]||null,last:all[all.length-1]||null,has:fs.length>0};
+  acctCache={ver,data};return data;
+}
+const acctKind=s=>s.pct?"avg":s.level?"level":"sum";
+function acctStat(s,r){
+  const kind=acctKind(s),days=Object.keys(s.d).filter(d=>d>=r.from&&d<=r.to).sort();
+  if(!days.length)return {kind,days:0};
+  const vals=days.map(d=>s.d[d]);let v,prev=null,base=null,baseDay=null;
+  if(kind==="level"){v=vals[vals.length-1];const before=Object.keys(s.d).filter(d=>d<r.from).sort().pop();
+    if(before){base=s.d[before];baseDay=before}else if(days.length>=2){base=vals[0];baseDay=days[0]}}
+  else{v=kind==="avg"?mean(vals):vals.reduce((a,b)=>a+b,0);
+    if(r.len){const pf=addDays(r.from,-r.len),pt=addDays(r.from,-1),pv=Object.keys(s.d).filter(d=>d>=pf&&d<=pt).map(d=>s.d[d]);
+      if(pv.length>=r.len*0.8)prev=kind==="avg"?mean(pv):pv.reduce((a,b)=>a+b,0)}}
+  return {kind,days:days.length,v,prev,base,baseDay,first:days[0],last:days[days.length-1]};
+}
+/* followers gained on one platform in the dates: a "new followers" column if there is one, otherwise the change in total followers */
+function followerGain(A,p,r){
+  const g=A.series.find(s=>s.p===p&&!s.pct&&GAIN_RE.test(s.name));
+  if(g){const st=acctStat(g,r);if(st.days)return {v:st.v,prev:st.prev}}
+  const fl=A.series.find(s=>s.p===p&&acctKind(s)==="sum"&&/^(total |organic )?followers?$/i.test(String(s.name).trim()));
+  if(fl){const st=acctStat(fl,r);if(st.days)return {v:st.v,prev:st.prev}}
+  const l=A.series.find(s=>s.p===p&&acctKind(s)==="level"&&/followers?$|fans$/i.test(String(s.name).trim()));
+  if(l){const st=acctStat(l,r);if(st.days&&st.base!=null)return {v:st.v-st.base,prev:null}}
+  return null;
+}
+const fmtAcct=(s,v)=>v==null?"–":s.pct?(v>1?(v>=10?Math.round(v):v.toFixed(1))+"%":fmtP(v)):fmtN(v);
+const hourName=h=>(h%12||12)+(h<12?"am":"pm");
+function renderAccount(sel){
+  const A=accountData(),r=sel.r,plats=ALLP.filter(k=>S.plats.has(k));
+  const S2=A.series.filter(s=>plats.includes(s.p)),H=A.hourly.filter(h=>plats.includes(h.p)),D=A.dists.filter(d=>plats.includes(d.p)),T=A.tabs.filter(t=>plats.includes(t.p));
+  const any=S2.length||H.length||D.length||T.length;
+  $("acctCard").hidden=!any;if(!any)return;
+  const vs=r.len?" vs previous "+r.len+" days":"";
+  const order=s=>(GAIN_RE.test(s.name)?0:acctKind(s)==="level"&&/follow|fans/i.test(s.name)?1:2);
+  const stats=S2.map(s=>({s,st:acctStat(s,r)})).filter(x=>x.st.days).sort((a,b)=>order(a.s)-order(b.s)||ALLP.indexOf(a.s.p)-ALLP.indexOf(b.s.p));
+  $("acctSub").textContent=stats.length?"Whole-account numbers from your account reports, for these dates. Daily numbers are added up; totals like Followers show the latest figure.":
+    "Whole-account numbers from your account reports."+(A.first?" None fall in these dates: the reports cover "+fmtDate(A.first,true)+" – "+fmtDate(A.last,true)+". Try All time.":"");
+  // tiles
+  const tile=x=>{const s=x.s,st=x.st;let sub;
+    if(st.kind==="level")sub=st.base!=null?(()=>{const g=st.v-st.base;return '<span class="d"><span class="delta '+(g>0?"up":g<0?"down":"flat")+'">'+(g>0?"+":g<0?"−":"")+fmtN(Math.abs(g))+'</span> since '+fmtDate(st.baseDay)+'</span>'})():'<span class="d">latest, '+fmtDate(st.last)+'</span>';
+    else sub=deltaHtml(st.v,st.prev,st.prev!=null?vs:(st.kind==="avg"?" average over ":" over ")+st.days+" day"+(st.days>1?"s":""));
+    return '<div class="mcard" style="padding:12px 14px">'+platPill(s.p)+'<span class="label" style="overflow-wrap:anywhere">'+esc(s.name)+'</span><div class="mv" style="font-size:22px">'+fmtAcct(s,st.v)+'</div>'+sub+'</div>'};
+  $("acctTiles").innerHTML=stats.slice(0,12).map(tile).join("");
+  $("acctTiles").hidden=!stats.length;
+  // chart: one metric at a time
+  const opts=stats.map(x=>x.s.p+"|"+normH(x.s.name));
+  if(!opts.includes(S.acctMetric))S.acctMetric=opts[0]||null;
+  $("acctMetricWrap").hidden=opts.length<2;
+  $("acctMetricSel").innerHTML=stats.map(x=>{const k=x.s.p+"|"+normH(x.s.name);return '<option value="'+esc(k)+'"'+(k===S.acctMetric?" selected":"")+'>'+esc(PLAT[x.s.p].name+" · "+x.s.name)+'</option>'}).join("");
+  const cx=stats.find(x=>x.s.p+"|"+normH(x.s.name)===S.acctMetric);
+  $("acctChart").hidden=!cx;$("acctTake").hidden=true;
+  if(cx){const s=cx.s,st=cx.st,days=[];for(let d=st.first;d<=st.last;d=addDays(d,1))days.push(d);
+    let lastV=null;const vals=days.map(d=>{const v=s.d[d];if(v!=null){lastV=v;return v}return st.kind==="level"&&lastV!=null?lastV:0});
+    drawLine($("acctChart"),{h:220,labels:days.map(d=>fmtDate(d,true)),xlab:days.map(d=>fmtDate(d)),series:[{key:s.p,name:s.name,color:cssv(PLAT[s.p].cv),values:vals}],empty:!days.length});
+    if(days.length>=2){let take;
+      if(st.kind==="level"){const a=vals[0],b=vals[vals.length-1];take="<b>"+esc(s.name)+":</b> "+fmtN(a)+" on "+fmtDate(days[0])+" → "+fmtN(b)+" on "+fmtDate(days[days.length-1],true)+" ("+(b>=a?"+":"−")+fmtN(Math.abs(b-a))+").";}
+      else{let bi=0;vals.forEach((v,i)=>{if(v>vals[bi])bi=i});take="<b>Best day for "+esc(s.name.toLowerCase())+":</b> "+fmtDate(days[bi],true)+" ("+fmtAcct(s,vals[bi])+")"+(st.kind==="sum"?", against a typical "+fmtAcct(s,median(vals))+" a day.":".");}
+      $("acctTake").innerHTML=take;$("acctTake").hidden=false}}
+  // active hours
+  $("acctHours").innerHTML=H.map(h=>{
+    let ds=Object.keys(h.dh).filter(d=>d>=r.from&&d<=r.to),allD=false;if(!ds.length){ds=Object.keys(h.dh);allD=true}
+    const avg=[];for(let x=0;x<24;x++){const xs=ds.map(d=>h.dh[d][x]).filter(v=>v!=null);avg.push(xs.length?mean(xs):null)}
+    if(avg.every(v=>v==null))return "";
+    const blocks=[];for(let b=0;b<8;b++){const xs=avg.slice(b*3,b*3+3).filter(v=>v!=null);blocks.push({b,v:xs.length?mean(xs):0})}
+    const bmax=Math.max(1,...blocks.map(x=>x.v)),best=blocks.reduce((a,c)=>c.v>a.v?c:a,blocks[0]);
+    let bh=0;avg.forEach((v,i)=>{if(v!=null&&(avg[bh]==null||v>avg[bh]))bh=i});
+    return '<div style="margin-top:18px"><div class="col-h">'+platPill(h.p)+' When '+esc(h.name.toLowerCase())+' are online</div>'+
+      '<p class="note" style="margin:4px 0 10px;font-size:13.5px">Busiest hour: <b>'+hourName(bh)+'</b> (about '+fmtN(avg[bh])+' on average). Posting just before '+hourName(best.b*3)+'–'+hourName((best.b*3+3)%24)+' catches the most people. '+(allD?"No hourly numbers in these dates, so this uses every day in the report.":"Based on "+ds.length+" day"+(ds.length>1?"s":"")+".")+' Times are as the platform exported them.</p>'+
+      '<ul class="dist" style="--c:var('+PLAT[h.p].cv+')">'+blocks.map(x=>'<li><span>'+hourName(x.b*3)+' – '+hourName((x.b*3+3)%24)+'</span><span class="bar"><i style="width:'+(x.v/bmax*100).toFixed(1)+'%;opacity:'+(x.b===best.b?1:.55)+'"></i></span><b>'+fmtN(x.v)+'</b></li>').join("")+'</ul></div>'}).join("");
+  // breakdowns (age, gender, cities, anything with labels and one number)
+  $("acctDists").innerHTML=D.length?'<div class="mgrid" style="margin-top:18px">'+D.map(d=>{const its=d.items.slice(0,8),mx=Math.max(...its.map(x=>x[1]),0.0001),asP=d.pct||its.every(x=>x[1]<=1);
+    return '<div class="mcard">'+platPill(d.p)+'<h3>'+esc(d.metric)+' by '+esc(String(d.label).toLowerCase())+'</h3><ul class="dist" style="--c:var('+PLAT[d.p].cv+')">'+its.map(x=>'<li><span>'+esc(x[0])+'</span><span class="bar"><i style="width:'+(x[1]/mx*100).toFixed(1)+'%"></i></span><b>'+(asP?(x[1]>1?x[1].toFixed(1)+"%":fmtP(x[1])):fmtN(x[1]))+'</b></li>').join("")+'</ul>'+
+      '<span style="font-size:12px;color:var(--faint)">'+esc(d.title)+(d.at?' · uploaded '+fmtDate(ymd(new Date(d.at)),true):"")+'</span></div>'}).join("")+'</div>':"";
+  // anything else: shown as it came
+  $("acctTables").innerHTML=T.length?'<details class="fold" style="margin-top:18px"><summary>Other tables from your files <span class="sub">'+T.length+'</span></summary>'+T.map(t=>'<div style="margin-top:12px"><div class="col-h">'+platPill(t.p)+' '+esc(t.title)+'</div><div class="tbl-wrap"><table><thead><tr>'+t.headers.map(h=>'<th>'+esc(h)+'</th>').join("")+'</tr></thead><tbody>'+t.rows.slice(0,15).map(rw=>'<tr>'+rw.map(c=>'<td>'+esc(c)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>'+(t.rows.length>15?'<p class="note" style="font-size:12.5px">Showing 15 of '+t.rows.length+' rows.</p>':"")+'</div>').join("")+'</details>':"";
+}
+
+/* ---------- LinkedIn in detail: clicks and click-through, which only LinkedIn exports ---------- */
+function renderLinkedIn(sel){
+  const on=S.plats.has("LI")&&allPosts().some(p=>p.p==="LI");
+  $("liSection").hidden=!on;if(!on)return;
+  const r=sel.r,cur=sel.cur.filter(p=>p.p==="LI"),prev=sel.prev?sel.prev.filter(p=>p.p==="LI"):null;
+  const vs=r.len&&prev?" vs previous "+r.len+" days":"";
+  const imp=sum(cur,p=>p.v),hasCk=cur.some(p=>p.ck!=null),ck=sum(cur,p=>p.ck),hasF=cur.some(p=>p.f!=null);
+  const pImp=prev?sum(prev,p=>p.v):null,pCk=prev?sum(prev,p=>p.ck):null;
+  const rr=cur.filter(p=>p.er!=null),mer=rr.length?median(rr.map(p=>p.er)):null;
+  $("liFoldSub").textContent=cur.length+" post"+(cur.length===1?"":"s")+" in these dates"+(hasCk?" · "+fmtN(ck)+" clicks":"");
+  $("liTotSub").textContent="Company page posts. LinkedIn's views here are impressions, which is how LinkedIn counts reach.";
+  const tile=(l,v,c,p,note)=>'<div class="mcard" style="padding:12px 14px"><span class="label">'+l+'</span><div class="mv" style="font-size:22px">'+v+'</div>'+deltaHtml(c,p,note)+'</div>';
+  $("liTotals").innerHTML=tile("Posts",fmtN(cur.length),cur.length,prev?prev.length:null,vs)+tile("Impressions",fmtN(imp),imp,pImp,vs)+
+    (hasCk?tile("Clicks",fmtN(ck),ck,pCk,vs)+tile("Click-through rate",imp?(ck/imp*100).toFixed(1)+"%":"–",null,null," clicks ÷ impressions"):"")+
+    tile("Reactions",fmtN(sum(cur,p=>p.l)),null,null,"")+tile("Comments",fmtN(sum(cur,p=>p.cm)),null,null,"")+tile("Reposts",fmtN(sum(cur,p=>p.s)),null,null,"")+
+    tile("Typical engagement rate",fmtP(mer),null,null," (likes + comments + reposts) ÷ impressions")+(hasF?tile("New followers",fmtN(sum(cur,p=>p.f)),null,null," from posts"):"");
+  // takeaway: the post that stood out, and how the building-in-public posts compare
+  const lines=[];
+  if(cur.length>=3){const key=p=>hasCk?(p.ck||0):p.v,top=[...cur].sort((a,b)=>key(b)-key(a)||b.v-a.v)[0],md=median(cur.map(key));
+    if(md>0&&key(top)>=2*md)lines.push("<b>Stand-out post:</b> “"+esc((top.c||"untitled").slice(0,80))+((top.c||"").length>80?"…":"")+"” ("+fmtDate(top.d,true)+") got "+fmtN(top.v)+" impressions"+(hasCk?" and "+fmtN(top.ck||0)+" clicks":"")+", about "+(key(top)/md).toFixed(key(top)/md>=10?0:1)+"× the typical LinkedIn post.");
+    const b=cur.filter(p=>p.b),o=cur.filter(p=>!p.b);
+    if(b.length>=2&&o.length>=2){const mb=median(b.map(p=>p.v)),mo=median(o.map(p=>p.v));
+      if(mo>0&&Math.abs(mb/mo-1)>=0.2)lines.push("<b>Building in public:</b> those posts get a typical "+fmtN(mb)+" impressions, vs "+fmtN(mo)+" for other LinkedIn posts ("+b.length+" vs "+o.length+" posts).")}}
+  else if(cur.length)lines.push("Only "+cur.length+" LinkedIn post"+(cur.length>1?"s":"")+" in these dates, so there's no pattern to read yet. Try a longer date range.");
+  $("liTake").innerHTML=lines.join("<br>");$("liTake").hidden=!lines.length;
+  // table
+  const rows=[...cur].sort((a,b)=>(b.ck||0)-(a.ck||0)||b.v-a.v);
+  const cap=p=>{const t=esc((p.c||"untitled").slice(0,90))+((p.c||"").length>90?"…":"");return p.u&&/^https?:\/\//.test(p.u)?'<a href="'+esc(p.u)+'" target="_blank" rel="noopener" style="color:inherit">'+t+'</a>':t};
+  $("liTable").innerHTML=rows.length?'<thead><tr><th>Date</th><th>Post</th><th class="n">Impressions</th>'+(hasCk?'<th class="n">Clicks</th><th class="n">Click-through</th>':"")+'<th class="n">Reactions</th><th class="n">Comments</th><th class="n">Reposts</th><th class="n">Eng. rate</th></tr></thead><tbody>'+
+    rows.map(p=>'<tr><td style="white-space:nowrap">'+fmtDate(p.d,true)+'</td><td style="min-width:220px">'+cap(p)+(p.b?' <span class="vchip neutral">Building in public</span>':"")+'</td><td class="n">'+fmtN(p.v)+'</td>'+(hasCk?'<td class="n">'+fmtN(p.ck)+'</td><td class="n">'+(p.v&&p.ck!=null?(p.ck/p.v*100).toFixed(1)+"%":"–")+'</td>':"")+'<td class="n">'+fmtN(p.l)+'</td><td class="n">'+fmtN(p.cm)+'</td><td class="n">'+fmtN(p.s)+'</td><td class="n">'+fmtP(p.er)+'</td></tr>').join("")+'</tbody>':
+    '<tbody><tr><td class="empty">No LinkedIn posts in these dates. The posts you uploaded are outside them, so try All time.</td></tr></tbody>';
+}
+
 /* ---------- how fresh the numbers are ---------- */
 function freshness(){
   if(isExample())return null;
   const ds=[];const ps=allPosts();if(ps.length)ds.push(ps.reduce((m,p)=>p.d>m?p.d:m,ps[0].d));
   const P=pinterestData();if(P.last)ds.push(P.last);
+  const A=accountData();if(A.last)ds.push(A.last);
   if(!ds.length)return null;const last=ds.sort().pop(),age=daysBetween(last,ymd(new Date()));
   return {last,age,stale:age>35};
 }
@@ -1494,6 +1682,10 @@ function renderOverview(sel){
   const hasF=cur.some(p=>p.f!=null);
   const f=sum(cur,p=>p.f),pf=prev?sum(prev,p=>p.f):null;
   let k5=hasF?kpiTile("New followers",fmtN(f),f,pf,vs):kpiTile("Shares",fmtN(sum(cur,p=>p.s)),sum(cur,p=>p.s),prev?sum(prev,p=>p.s):null,vs);
+  /* no follower numbers on the posts: use the account reports' followers-by-day instead */
+  let gainNote=false;
+  if(!hasF){const A=accountData(),gs=PKEYS.filter(k=>S.plats.has(k)).map(k=>followerGain(A,k,r)).filter(Boolean);
+    if(gs.length){const g=sum(gs,x=>x.v),gp=gs.every(x=>x.prev!=null)?sum(gs,x=>x.prev):null;k5=kpiTile("New followers",(g<0?"−":"")+fmtN(Math.abs(g)),g,gp,gp!=null?vs:" · from account reports");gainNote=true}}
   let pinTile="";
   if(pinOn){const pr=pinRange(P),M=pinMetricsInRange(P,pr)[0];
     if(M){let pt=null;if(r.len){let t=0,n=0;const e=addDays(pr.from,-1);for(let i=0;i<r.len;i++){const v=P.daily[M.name][addDays(e,-i)];if(v!=null){t+=v;n++}}if(n>=r.len*0.8)pt=t}
@@ -1504,7 +1696,8 @@ function renderOverview(sel){
     kpiTile("Engagements",fmtN(te),te,pe,vs)+
     kpiTile("Typical engagement rate",fmtP(mer),mer,pmer,pmer!=null?vs:"")+k5:"")+pinTile;
   const notes=[];
-  if(pinOn&&cur.length)notes.push("Posts, views and engagements are Instagram, TikTok and Facebook posts. Pinterest has its own tile because its export counts by day, not by pin.");
+  if(pinOn&&cur.length)notes.push("Posts, views and engagements don't include Pinterest. It has its own tile because its export counts by day, not by pin.");
+  if(gainNote)notes.push("New followers comes from your followers-by-day account reports, since the post exports don't include follows.");
   if(cur.length&&ymd(new Date())<"2026-12-31")notes.push("Engagements now count likes, comments and shares only (saves are shown separately since 2 Nov 2026), so they read lower than older reports.");
   $("kpiNote").hidden=!notes.length;$("kpiNote").textContent=notes.join(" ");
 
@@ -1535,6 +1728,7 @@ function renderOverview(sel){
     const share=tp&&totals[bi]?Math.round(val(tp)/totals[bi]*100):0;
     $("trendTake").innerHTML="<b>Best "+(weekly?"week":"day")+" for posts:</b> "+esc(labels[bi])+" with "+fmtN(totals[bi])+" "+(metric==="views"?"views":"engagements")+"."+(tp?" "+(share>=60?"Most of it came from":"The biggest post was")+" the "+PLAT[tp.p].name+" post “"+esc((tp.c||"untitled").slice(0,70))+((tp.c||"").length>70?"…":"")+"” ("+fmtN(val(tp))+").":"");
     $("trendTake").hidden=false;}else $("trendTake").hidden=true;
+  renderAccount(sel);
   const sc=renderScorecard(cur,prev,P);
   renderAI(sel);
 
@@ -1563,6 +1757,8 @@ function renderOverview(sel){
   fillBetter("ovBetter",doBetter({posts:cur,kind:"overview",r,sc,P,ins}),"Nothing clear to change yet. Try a longer date range, since it needs at least 4 posts with views.");
   // Pinterest in detail
   $("pinSection").hidden=!pinOn;if(pinOn){renderPinSection(P);const pt=pinTotals(P);$("pinFoldSub").textContent="daily chart, best days, boards and top pins"+(pt.impr?" · "+fmtN(pt.impr)+" impressions in the export":"")}
+  // LinkedIn in detail
+  renderLinkedIn(sel);
   // how this is worked out + what the files contained
   $("methodNote").innerHTML="<p><b>How this is worked out.</b> Every post is compared with the typical (median) post on its own platform, so TikTok's bigger numbers don't drown out Instagram and Facebook, and one viral post can't skew the picture. Engagements = likes + comments + shares. Engagement rate = engagements ÷ views, and it's left out for posts with under "+MINV+" views because tiny numbers swing wildly. "+
     "“What's working” reads each caption for its topic, places, opening line, call to action, emojis and hashtags, plus the format, video length and posting time, and only reports a pattern when at least "+(countRated(cur)>=15?3:2)+" posts share it and it's 15% or more above or below normal.</p>"+coverageHtml(cur);
@@ -1719,7 +1915,7 @@ function drawBars(el,data){
   svg.querySelector(".hits").addEventListener("pointerleave",()=>{tip.hidden=true;svg.querySelectorAll("path[data-i]").forEach(b=>b.style.opacity="1")});
 }
 const ro=new ResizeObserver(entries=>{for(const en of entries){const el=en.target;if(!el._data||el.offsetParent===null)continue;if(el._lastW===el.clientWidth)continue;el._lastW=el.clientWidth;(el._kind==="line"?drawLine:drawBars)(el,el._data)}});
-ro.observe($("trendChart"));ro.observe($("bipChart"));ro.observe($("friChart"));ro.observe($("pinChart"));
+ro.observe($("trendChart"));ro.observe($("acctChart"));ro.observe($("bipChart"));ro.observe($("friChart"));ro.observe($("pinChart"));
 
 /* ---------- series: building in public + Friday recommendations ---------- */
 function seriesInsights(series,others,prevSeries,rangeLen,word){
@@ -2063,11 +2259,11 @@ function renderFiles(){
   if(!files.length){$("filesTable").innerHTML='<tbody><tr><td class="empty">No files yet. The overview is showing example posts until you add one.</td></tr></tbody>';return}
   $("filesTable").innerHTML='<thead><tr><th>File</th><th>Platform</th><th class="n">Posts</th><th>Dates covered</th><th>Used?</th><th>Added</th>'+(canUp?'<th></th>':"")+'</tr></thead><tbody>'+
     files.map(([id,f])=>{const plats=f.kind==="web"?'<span class="pill" style="--c:var(--nav)"><i></i>Website</span>':(f.platforms||[]).map(platPill).join(" ");const when=f.uploadedAt?new Date(f.uploadedAt):null;
-      return '<tr><td style="overflow-wrap:anywhere;min-width:160px">'+esc(f.name)+'</td><td>'+plats+'</td><td class="n">'+(["tables","pinterest","web","audience"].includes(f.kind)?"–":fmtN((info.get(id)?info.get(id).posts.length:f.count)))+'</td><td class="num" style="white-space:nowrap">'+(f.minDate?fmtDate(f.minDate,true)+" – "+fmtDate(f.maxDate,true):"–")+'</td><td style="min-width:150px">'+(f.kind==="web"?'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Website visits</span>':f.kind==="audience"?'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Audience by country</span>':f.kind==="pinterest"?'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Pinterest</span>':f.kind==="tables"||(info.get(id)&&info.get(id).daily)?'<span style="color:var(--bad);font-weight:600">Not used</span> <span style="color:var(--muted)">· account report, safe to remove</span>':'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Posts</span>')+'</td><td style="white-space:nowrap">'+(when?when.getDate()+" "+MON[when.getMonth()]+" "+when.getFullYear():"")+'<span class="who" data-uid="'+esc(f.by||"")+'" style="color:var(--muted)"></span></td>'+
+      return '<tr><td style="overflow-wrap:anywhere;min-width:160px">'+esc(f.name)+'</td><td>'+plats+'</td><td class="n">'+(["tables","pinterest","web","audience"].includes(f.kind)?"–":fmtN((info.get(id)?info.get(id).posts.length:f.count)))+'</td><td class="num" style="white-space:nowrap">'+(f.minDate?fmtDate(f.minDate,true)+" – "+fmtDate(f.maxDate,true):"–")+'</td><td style="min-width:150px">'+(f.kind==="web"?'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Website visits</span>':f.kind==="audience"?'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Audience by country</span>':f.kind==="pinterest"?'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Pinterest</span>':f.kind==="tables"?'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Account report</span>':(info.get(id)&&info.get(id).daily)?'<span style="color:var(--bad);font-weight:600">Not used</span> <span style="color:var(--muted)">· upload it again to read it as an account report</span>':'<span style="color:var(--good);font-weight:600">Yes</span> <span style="color:var(--muted)">· Posts</span>')+'</td><td style="white-space:nowrap">'+(when?when.getDate()+" "+MON[when.getMonth()]+" "+when.getFullYear():"")+'<span class="who" data-uid="'+esc(f.by||"")+'" style="color:var(--muted)"></span></td>'+
       (canUp?'<td class="n"><button class="btn '+(S.confirmDel===id?"danger":"ghost")+'" style="padding:5px 10px;font-size:12.5px" data-del="'+esc(id)+'">'+(S.confirmDel===id?"Confirm remove":"Remove")+'</button></td>':"")+'</tr>'}).join("")+'</tbody>';
   if(S.user){const ids=[...new Set(files.map(([,f])=>f.by).filter(Boolean))];if(ids.length)S.user.profiles(ids).then(ps=>{document.querySelectorAll(".who").forEach(el=>{const p=ps[el.dataset.uid];el.textContent=p&&p.name?" · "+(p.isMe?"you":p.name):""})}).catch(()=>{})}
 }
-const COLNAME={date:"date",id:"post ID",caption:"caption",url:"link",type:"post type",platform:"platform",series:"labels",views:"views",reach:"reach",likes:"likes",comments:"comments",shares:"shares",saves:"saves",follows:"follows",dur:"video length",watch:"watch time",comp:"watched to the end"};
+const COLNAME={clicks:"clicks",date:"date",id:"post ID",caption:"caption",url:"link",type:"post type",platform:"platform",series:"labels",views:"views",reach:"reach",likes:"likes",comments:"comments",shares:"shares",saves:"saves",follows:"follows",dur:"video length",watch:"watch time",comp:"watched to the end"};
 function renderPending(){
   const box=$("pending");
   if(!S.pending.length){box.innerHTML="";$("pendActions").hidden=true;return}
@@ -2081,13 +2277,14 @@ function renderPending(){
     if(f.kind==="audience"){const need=f.choice==="auto"&&!f.detected;
       return '<div class="pend"><div class="pend-h"><b>'+esc(f.name)+'</b>'+platSel+'</div><span class="msg">Audience by country: '+esc(f.aud.items.slice(0,4).map(x=>x[0]+" "+fmtP(x[1])).join(" · "))+'</span>'+(need?'<span class="warn">Pick the platform above.</span>':"")+'</div>'}
     if(f.kind==="tables"){const need=f.choice==="auto"&&!f.detected;
-      return '<div class="pend"><div class="pend-h"><b>'+esc(f.name)+'</b>'+platSel+'</div><span class="msg">Account &amp; audience data: '+esc(f.matched.join(" · "))+'</span>'+(need?'<span class="warn">Pick the platform above.</span>':"")+'</div>'}
+      return '<div class="pend"><div class="pend-h"><b>'+esc(f.name)+'</b>'+platSel+'</div><span class="msg">Account report: '+esc(f.matched.join(" · "))+'. Shows under Account growth on the Overview.</span>'+(need?'<span class="warn">Pick the platform above.</span>':"")+'</div>'}
     const posts=finalizeRows(f.rows,f.choice),need=f.rows.length-posts.length;
     let dates="";if(posts.length){let a=posts[0].d,b=posts[0].d;for(const p of posts){if(p.d<a)a=p.d;if(p.d>b)b=p.d}dates=fmtDate(a,true)+" – "+fmtDate(b,true)}
     const det=f.detected&&f.detected!=="mixed"?PLAT[f.detected].name:f.detected==="mixed"?"several":"not sure";
     return '<div class="pend"><div class="pend-h"><b>'+esc(f.name)+'</b><select class="sel" data-pi="'+i+'" id="pplat-'+i+'" aria-label="Platform for '+esc(f.name)+'"><option value="auto"'+(f.choice==="auto"?" selected":"")+'>Detected: '+det+'</option>'+PKEYS.map(k=>'<option value="'+k+'"'+(f.choice===k?" selected":"")+'>'+PLAT[k].name+'</option>').join("")+'</select></div>'+
       '<span class="msg">'+posts.length+' posts'+(dates?" · "+dates:"")+' · read: '+esc(f.matched.map(m=>COLNAME[m]||m).join(", "))+'</span>'+(["dur","watch","comp"].some(m=>f.matched.includes(m))?"":'<span class="msg">No video length or watch-time columns, so video insights won\'t include this file.</span>')+
       (need>0?'<span class="warn">'+need+' posts have no platform yet. Pick the platform above.</span>':"")+
+      (f.extra&&f.extra.length?'<span class="msg">Also read: '+esc(f.extra.map(tableSummary).join(" · "))+'. Shows under Account growth.</span>':"")+
       f.warnings.map(w=>'<span class="msg">'+esc(w)+'</span>').join("")+'</div>';
   }).join("");
   const ok=S.pending.filter(f=>!f.error&&!f.loading);
@@ -2119,6 +2316,14 @@ async function addFiles(list){
     renderPending();
   }
 }
+async function saveTables(name,tables,plat){
+  const fid="f"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  tables=tables.map(t=>Object.assign({},t,{p:plat}));
+  while(JSON.stringify(tables).length>200000){tables=tables.map(t=>t.rows?Object.assign({},t,{rows:t.rows.slice(0,Math.floor(t.rows.length*0.7))}):t)}
+  await S.db.doc("chunks/"+fid+"_0").set({fileId:fid,part:0,kind:"tables",tables});
+  const ds=tables.filter(t=>t.type==="series").flatMap(t=>t.rows.map(r=>r[0])).sort();
+  await S.db.doc("files/"+fid).set({name:name.slice(0,140),kind:"tables",count:tables.length,parts:1,minDate:ds[0]||null,maxDate:ds[ds.length-1]||null,platforms:[plat],uploadedAt:Date.now(),by:S.uid||null});
+}
 async function saveAll(){
   if(!S.db)return;
   const ok=S.pending.filter(f=>!f.error&&!f.loading);
@@ -2131,8 +2336,9 @@ async function saveAll(){
         const plat=f.choice!=="auto"?f.choice:f.detected;
         const fid="f"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
         msg.textContent="Saving "+f.name+"…";
-        await S.db.doc("chunks/"+fid+"_0").set({fileId:fid,part:0,kind:"audience",aud:f.aud});
+        await S.db.doc("chunks/"+fid+"_0").set({fileId:fid,part:0,kind:"audience",aud:{items:f.aud.items,counts:f.aud.counts}});
         await S.db.doc("files/"+fid).set({name:f.name.slice(0,140),kind:"audience",count:f.aud.items.length,parts:1,minDate:null,maxDate:null,platforms:[plat],uploadedAt:Date.now(),by:S.uid||null});
+        if(f.extra&&f.extra.length){await saveTables(f.name+" (other tables)",f.extra,plat);nt++}
         np++;continue;
       }
       if(f.kind==="pinterest"){
@@ -2160,6 +2366,8 @@ async function saveAll(){
       let a=posts[0].d,b=posts[0].d;for(const p of posts){if(p.d<a)a=p.d;if(p.d>b)b=p.d}
       await S.db.doc("files/"+fid).set({name:f.name.slice(0,140),count:posts.length,parts,minDate:a,maxDate:b,platforms:[...new Set(posts.map(p=>p.p))],uploadedAt:Date.now(),by:S.uid||null});
       n+=posts.length;
+      if(f.extra&&f.extra.length){const plat=f.choice!=="auto"?f.choice:(f.detected&&f.detected!=="mixed"?f.detected:posts[0].p);
+        msg.textContent="Saving "+f.name+" daily totals…";await saveTables(f.name+" (daily totals)",f.extra,plat);nt++}
     }
     S.pending=[];S.saving=false;$("fileInput").value="";renderPending();
     $("pendActions").hidden=false;msg.textContent="Added "+[n?fmtN(n)+" posts":"",nt?nt+" account file"+(nt>1?"s":""):"",np?np+" file"+(np>1?"s":""):""].filter(Boolean).join(" and ")+". Everyone with the link sees it now.";
@@ -2202,6 +2410,7 @@ const saveFri=()=>{try{localStorage.setItem("sp-fri",JSON.stringify({mode:S.friM
 ["friModeDay","friModeTag"].forEach(id=>$(id).addEventListener("change",e=>{S.friMode=e.target.value;saveFri();render()}));
 let friT=null;$("friTag").addEventListener("input",e=>{S.friTag=e.target.value;S.friMode="tag";saveFri();clearTimeout(friT);friT=setTimeout(render,250)});
 $("pinMetricSel").addEventListener("change",e=>{S.pinMetric=e.target.value;render()});
+$("acctMetricSel").addEventListener("change",e=>{S.acctMetric=e.target.value;render()});
 $("pinMore").addEventListener("click",()=>{S.pinAll=!S.pinAll;render()});
 $("ideaList").addEventListener("click",async e=>{const b=e.target.closest("button[data-copy]");if(!b)return;const x=IDEAS[+b.dataset.copy];
   let ok=false;try{await navigator.clipboard.writeText(x.cap);ok=true}catch(err){}
